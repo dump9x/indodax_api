@@ -140,9 +140,9 @@ void format_orders_table(const char *json_response, const char *coin_pair) {
             return;
         }
         
-        printf("+------------+-----------------+-------------------+-----------------------------+\n");
-        printf("| Coin Name  | Price           | Open/Remain Order | Client Order ID             |\n");
-        printf("+------------+-----------------+-------------------+-----------------------------+\n");
+        printf("+------------+-----------------+-------------------+-----------------------------+------+\n");
+        printf("| Coin Name  | Price           | Open/Remain Order | Client Order ID             | type |\n");
+        printf("+------------+-----------------+-------------------+-----------------------------+------+\n");
         
         if (json_is_object(orders)) {
             const char *coin_pair_key;
@@ -157,6 +157,7 @@ void format_orders_table(const char *json_response, const char *coin_pair) {
                 json_array_foreach(order_array, index, order) {
                     json_t *price = json_object_get(order, "price");
                     json_t *orderid = json_object_get(order, "client_order_id");
+		    json_t *type = json_object_get(order, "type");
                     
                     char remain_field[64];
                     snprintf(remain_field, sizeof(remain_field), "remain_%s", coin_name);
@@ -165,8 +166,9 @@ void format_orders_table(const char *json_response, const char *coin_pair) {
                     const char *price_str = json_is_string(price) ? json_string_value(price) : "N/A";
                     const char *remain_str = json_is_string(remain) ? json_string_value(remain) : "N/A";
                     const char *orderid_str = json_is_string(orderid) ? json_string_value(orderid) : "N/A";
+		    const char *type_str = json_is_string(type) ? json_string_value(type) : "N/A";
                     
-                    printf("| %-10s | %-15s | %-17s | %-10s\t |\n", coin_name, price_str, remain_str, orderid_str);
+                    printf("| %-10s | %-15s | %-17s | %-10s\t | %-4s |\n", coin_name, price_str, remain_str, orderid_str, type_str);
                 }
                 free(coin_name);
             }
@@ -178,6 +180,7 @@ void format_orders_table(const char *json_response, const char *coin_pair) {
             json_array_foreach(orders, index, order) {
                 json_t *price = json_object_get(order, "price");
                 json_t *orderid = json_object_get(order, "client_order_id");
+		json_t *type = json_object_get(order, "type");
 
                 char remain_field[64];
                 snprintf(remain_field, sizeof(remain_field), "remain_%s", coin_name);
@@ -186,15 +189,16 @@ void format_orders_table(const char *json_response, const char *coin_pair) {
                 const char *price_str = json_is_string(price) ? json_string_value(price) : "N/A";
                 const char *remain_str = json_is_string(remain) ? json_string_value(remain) : "N/A";
                 const char *orderid_str = json_is_string(orderid) ? json_string_value(orderid) : "N/A";
+		const char *type_str = json_is_string(type) ? json_string_value(type) : "N/A";
 
-                printf("| %-10s | %-15s | %-17s | %-10s\t |\n", coin_name, price_str, remain_str, orderid_str);
+                printf("| %-10s | %-15s | %-17s | %-10s\t | %-4s |\n", coin_name, price_str, remain_str, orderid_str, type_str);
             }
             free(coin_name);
         } else {
             fprintf(stderr, "Unknown 'orders' format in JSON response\n");
         }
         
-        printf("+------------+-----------------+-------------------+-----------------------------+\n");
+        printf("+------------+-----------------+-------------------+-----------------------------+------+\n");
     } else {
         json_t *error_field = json_object_get(root, "error");
         if (json_is_string(error_field)) {
@@ -329,10 +333,12 @@ void format_trade_response_table(const char *json_response, const char *coin, co
         json_t *remain_value = json_object_get(return_obj, remain_field);
         json_t *order_id = json_object_get(return_obj, "order_id");
         json_t *client_order_id = json_object_get(return_obj, "client_order_id");
+        json_t *type = json_object_get(return_obj, "type");
         
         const char *remain_str = json_is_string(remain_value) ? json_string_value(remain_value) : "N/A";
         const char *order_id_str = json_is_integer(order_id) ? "N/A" : json_string_value(order_id);
         const char *client_order_id_str = json_is_string(client_order_id) ? json_string_value(client_order_id) : "N/A";
+        const char *type_str = json_is_string(type) ? json_string_value(type) : "N/A";
         
         // Handle integer order_id
         char order_id_buffer[32];
@@ -341,11 +347,11 @@ void format_trade_response_table(const char *json_response, const char *coin, co
             order_id_str = order_id_buffer;
         }
         
-        printf("+------------+-----------------+-------------------+-----------------------------+\n");
-        printf("| Coin Name  | Price           | Remaining Amount  | Client Order ID             |\n");
-        printf("+------------+-----------------+-------------------+-----------------------------+\n");
-        printf("| %-10s | %-15s | %-17s | %-27s |\n", coin, price, remain_str, client_order_id_str);
-        printf("+------------+-----------------+-------------------+-----------------------------+\n");
+        printf("+------------+-----------------+-------------------+-----------------------------+------+\n");
+        printf("| Coin Name  | Price           | Remaining Amount  | Client Order ID             | type }\n");
+        printf("+------------+-----------------+-------------------+-----------------------------+------+\n");
+        printf("| %-10s | %-15s | %-17s | %-27s | %-4s |\n", coin, price, remain_str, client_order_id_str, type_str);
+        printf("+------------+-----------------+-------------------+-----------------------------+------+\n");
     } else {
         json_t *error_field = json_object_get(root, "error");
         if (json_is_string(error_field)) {
